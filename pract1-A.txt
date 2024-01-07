@@ -1,0 +1,47 @@
+from spyne.application import Application
+from spyne.decorator import rpc
+from spyne.service import ServiceBase
+from spyne.protocol.soap import Soap11
+from spyne.server.wsgi import WsgiApplication
+from spyne.model.primitive import Integer
+from wsgiref.Simple_server import make server
+
+class CalculatorService(ServiceBase):
+    @rpc(Integer, Integer, _returns=Integer)
+    def add_numbers(self, num1, num2):
+        return num1 + num2
+
+soap_app = Application([CalculatorService],
+                       tns='example.soap',
+                       in_protocol=Soap11(validator='lxml'),
+                       out_protocol=Soap11())
+
+wsgi_app = WsgiApplication(soap_app)
+
+host = 'localhost'
+port = 10000
+
+server = make_server(host, port, wsgi_app)
+print(f"Listening on {host}:{port}")
+server.serve_forever()
+
+
+
+
+
+
+
+
+
+
+
+
+from zeep import Client
+
+# Create a Zeep client pointing to the SOAP service WSDL
+client = Client('http://localhost:8000/?wsdl')
+
+# Call the add_numbers method of the CalculatorService
+result = client.service.add_numbers(5, 10)
+
+print(f"Result from the SOAP service: {result}")  # Corrected the formatting for displaying the result
